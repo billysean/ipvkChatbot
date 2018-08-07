@@ -22,6 +22,7 @@ module.exports = [
       // Apparently they don't so in Monty Python style send them on thier way
       chatbase.setAsTypeUser().newMessage()
         .setAsNotHandled()
+        .setIntent(results.response.toString())
         .setMessage(results.response.toString())
         .send()
         .catch(e => console.error(e));
@@ -39,15 +40,15 @@ module.exports = [
     }
   },
 
-  //ask for boss
   function (session, results) {
     chatbase.setAsTypeAgent().newMessage()
       .setMessage(results.response.toString())
       .send()
       .catch(e => console.error(e));
 
+  //ask for boss
     builder.Prompts.text(session, constants.questions.boss.q);
-
+    chatbase.setIntent('boss');
   },
 
   function (session, results) {
@@ -62,12 +63,14 @@ module.exports = [
 
     if (!correct) {
       session.send(constants.missBoss);
+      chatbase.setIntent('missBoss');
     }
       agentMsg.send().catch(e => console.error(e));           
       userMsg.send().catch(e => console.error(e));           
     
     //ask for product
     builder.Prompts.text(session, constants.questions.product.q);
+    chatbase.setIntent('product');
   },
 
   function (session, results) {
@@ -82,12 +85,14 @@ module.exports = [
 
     if (!correct) {
       session.send(constants.missproduct);
+      chatbase.setIntent('missProduct')
     }
       agentMsg.send().catch(e => console.error(e));
       userMsg.send().catch(e => console.error(e));
         
     //ask for ace
     builder.Prompts.text(session, constants.questions.ace.q);
+    chatbase.setIntent('ace')
   },
 
   function (session, results) {
@@ -125,9 +130,9 @@ module.exports = [
     userMsg.setMessage(answer);
     
     if(correct){
-      session.beginDialog('/ipvk')
+      session.beginDialog('/cards');
     }else{
-      session.endConversation()
+      session.endConversation();
     }
   }
 ];

@@ -25,7 +25,7 @@ module.exports = {
       check: input => !!input.toLowerCase().match('the marvelous nanang riyadi') || !!input.toLowerCase().includes('nanang riyadi')
     },
     goTo:{
-      q:'do you want to test on our general?',
+      q:'do you want to test on cards view?',
       check: input => !!input.toLowerCase().match('yes')
     }
   },

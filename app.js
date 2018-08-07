@@ -3,6 +3,7 @@ var builder = require('botbuilder')
 var azure = require('botbuilder-azure')
 var builder_cognitiveservices = require("botbuilder-cognitiveservices")
 
+//- start server configuration
 var server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 3978, function () {
     console.log('%s listening to %s', server.name, server.url);
@@ -12,13 +13,14 @@ var connector = new builder.ChatConnector({
     appId: process.env.MicrosoftAppId,
     appPassword: process.env.MicrosoftAppPassword,
     openIdMetadata: process.env.BotOpenIdMetadata
-})
+});
 
 server.post('/api/messages', connector.listen());
 server.get('/', restify.plugins.serveStatic({
     directory: '.',
     default: '/index.html'
 }));
+//- end server configuration
 
 var documentDBOptions = {
     host: 'https://ipvkcosmos.documents.azure.com:443/',
@@ -27,6 +29,7 @@ var documentDBOptions = {
     collection: 'chatbot'
 }
 
+//- database azure config
 var docDbClient = new azure.DocumentDbClient(documentDBOptions);
 var cosmosStorage = new azure.AzureBotStorage({ gzipData: false }, docDbClient);
 
@@ -34,12 +37,27 @@ var bot = new builder.UniversalBot(connector,function(session){
     session.send('hi welcome to IPVK bot');
 });
 bot.set('storage', cosmosStorage);
+//- end database azure config
 
+//- dashbot setup
+var dashbotApiMap = {
+    // 'facebook': process.env.DASHBOT_API_KEY_FACEBOOK,
+    // 'slack':  process.env.DASHBOT_API_KEY_SLACK,
+    // 'kik': process.env.DASHBOT_API_KEY_KIK,
+    // 'skype': process.env.DASHBOT_API_KEY_GENERIC
+    'webchat': 'HjqxdzRxKgncJ3hsS07zslgLGKy92EUQ1NfuUU1e'
+};
+var dashbot = require('dashbot')(dashbotApiMap,{debug:true, urlRoot: process.env.DASHBOT_URL_ROOT}).microsoft;
+bot.use(dashbot);
+//- end dashbot setup
 
+//- bot dialogs
 var ipvkGeneral = require('./dialogs/ipvk-general-dialog')
 var ipvkAnalytics = require('./dialogs/ipvk-analytics-dialog')
+var ipvkCards = require('./dialogs/ipvk-cards-dialog')
 bot.dialog('/ipvk', ipvkGeneral);
 bot.dialog('/analytics', ipvkAnalytics);
+bot.dialog('/cards',ipvkCards);
 
 bot.dialog('general', function (session) {
     session.beginDialog('/ipvk');
@@ -52,6 +70,14 @@ bot.dialog('analytics', function (session) {
 }).triggerAction({
     matches: /^analytics$/i
 });
+//- end bot dialogs
+
+
+
+
+
+
+
 
 
 
